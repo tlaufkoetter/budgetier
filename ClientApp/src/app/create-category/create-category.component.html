@@ -6,12 +6,12 @@
     <a disabled="true" mat-button></a>
 </mat-toolbar>
 <form #f="ngForm" (ngSubmit)="onSubmit(f)">
-    <mat-form-field appearance="fill">
+    <mat-form-field appearance="fill" class="full-width">
         <mat-label>Name</mat-label>
         <input matInput name="name" required minlength="4" ngModel>
     </mat-form-field>
     <br>
-    <mat-form-field appearance="fill">
+    <mat-form-field appearance="fill" class="full-width">
         <mat-label>Budget</mat-label>
         <input matInput type="number" name="budget" min="0.01" ngModel>
     </mat-form-field>
