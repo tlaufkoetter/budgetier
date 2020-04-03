@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { CategoryReports } from './category-reports';
 import { CategoryReport } from './category-report';
 import { CategoryBooking } from './category-booking';
+import { Category } from './category';
 
 @Injectable({
   providedIn: 'root'
@@ -27,6 +28,14 @@ export class BudgetierApiService {
   getBooking(id: string) : Observable<CategoryBooking>
   {
     return this.http.get<CategoryBooking>(this.baseUrl + "/bookings/" + id)
+  }
+
+  createCatgory(name: string, budget: number) : Observable<Category>
+  {
+    var body = {name: name}
+    if (budget > 0.01)
+      body['budget'] = budget
+    return this.http.post<Category>(this.baseUrl + '/categories', body)
   }
 
 }

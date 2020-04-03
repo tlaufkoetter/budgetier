@@ -1,12 +1,16 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, LOCALE_ID } from '@angular/core';
-
+import { FormsModule } from '@angular/forms'
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatCardModule } from '@angular/material/card';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatButtonModule } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input'
+import { MatMenuModule } from '@angular/material/menu';
 
 import { CategoryReportsComponent } from './category-reports/category-reports.component';
 import { CategoryReportDetailComponent } from './category-report-detail/category-report-detail.component';
@@ -17,7 +21,8 @@ import { registerLocaleData } from '@angular/common';
 import localeDe from '@angular/common/locales/de';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
-import { HttpClientModule } from '@angular/common/http'
+import { HttpClientModule } from '@angular/common/http';
+import { CreateCategoryComponent } from './create-category/create-category.component'
 
 registerLocaleData(localeDe, 'de-DE');
 
@@ -28,15 +33,21 @@ registerLocaleData(localeDe, 'de-DE');
     CategoryReportDetailComponent,
     CategoryReportItemComponent,
     BookingsComponent,
-    BookingItemComponent
+    BookingItemComponent,
+    CreateCategoryComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    FormsModule,
     MatToolbarModule,
     MatCardModule,
     MatProgressBarModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatInputModule,
+    MatMenuModule,
     HttpClientModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
   ],

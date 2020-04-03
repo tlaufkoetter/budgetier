@@ -1,3 +1,13 @@
+<mat-toolbar color="primary" class="app-toolbar" style="text-align: center;">
+    <span class="fill-space"></span>
+    Kategorie Übersicht
+    <span class="fill-space"></span>
+</mat-toolbar>
 <div *ngIf="report">
  <app-category-report-item *ngFor="let report of report.reports" [report]="report" routerLink="/categories/{{report.category.id}}"></app-category-report-item>
+</div>
+<div class="fab-container">
+    <a mat-fab color="primary" class="fab-primary" [routerLink]="['/create-category']">
+        <i class="material-icons">add</i>
+    </a>
 </div>
