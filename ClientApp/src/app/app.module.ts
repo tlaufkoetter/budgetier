@@ -22,7 +22,8 @@ import localeDe from '@angular/common/locales/de';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
 import { HttpClientModule } from '@angular/common/http';
-import { CreateCategoryComponent } from './create-category/create-category.component'
+import { CreateCategoryComponent } from './create-category/create-category.component';
+import { CreateBookingComponent } from './create-booking/create-booking.component'
 
 registerLocaleData(localeDe, 'de-DE');
 
@@ -34,7 +35,8 @@ registerLocaleData(localeDe, 'de-DE');
     CategoryReportItemComponent,
     BookingsComponent,
     BookingItemComponent,
-    CreateCategoryComponent
+    CreateCategoryComponent,
+    CreateBookingComponent
   ],
   imports: [
     BrowserModule,

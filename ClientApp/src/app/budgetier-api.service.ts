@@ -38,4 +38,16 @@ export class BudgetierApiService {
     return this.http.post<Category>(this.baseUrl + '/categories', body)
   }
 
+  createBooking(title: string, amount: number, timeStamp: Date, categoryId: string) : Observable<CategoryBooking>
+  {
+    let body = {
+      title: title,
+      amount: amount,
+      timeStamp: timeStamp,
+      categoryId: categoryId
+    }
+
+    return this.http.post<CategoryBooking>(this.baseUrl + '/bookings', body)
+  }
+
 }

@@ -1,0 +1,30 @@
+<mat-toolbar color="primary">
+    <a mat-button [routerLink]="['/categories', categoryId]">
+        <i class="material-icons">arrow_back</i>
+    </a>
+    <span class="fill-space"> </span>
+    Neue Buchung
+    <span class="fill-space"> </span>
+    <a mat-button disabled="true"></a>
+</mat-toolbar>
+<form #f="ngForm" (ngSubmit)="onSubmit(f)">
+    <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Titel</mat-label>
+        <input matInput name="title" required minlength="4" ngModel type="text">
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Betrag</mat-label>
+        <input matInput name="amount" required min="0.01" ngModel type="number">
+    </mat-form-field>
+    <br>
+    <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Datum</mat-label>
+        <input matInput name="timeStamp" required type="date" ngModel>
+    </mat-form-field>
+    <div class="fab-container">
+        <button mat-fab color="primary" [disabled]="f.invalid" type="submit">
+            <i class="material-icons">check</i>
+        </button>
+    </div>
+</form>

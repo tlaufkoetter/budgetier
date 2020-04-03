@@ -11,3 +11,8 @@
     <app-category-report-item [report]="report" ></app-category-report-item>
     <app-bookings [bookings]="report.bookings"></app-bookings>
 </div>
+<div class="fab-container">
+    <a mat-fab color="primary" [routerLink]="['/create-booking', report.category.id]">
+        <i class="material-icons">add</i>
+    </a>
+</div>
