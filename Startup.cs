@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using AutoMapper;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using BudgetierApi.Data;
 using Microsoft.OpenApi.Models;
+using System;
 
 namespace BudgetierWeb
 {
@@ -31,14 +31,7 @@ namespace BudgetierWeb
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Budgetier Api", Version = "v1" });
             });
-            services.AddCors(options =>
-            {
-                options.AddPolicy("mine",
-                builder =>
-                {
-                    builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
-                });
-            });
+
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -75,11 +68,11 @@ namespace BudgetierWeb
 
             app.UseRouting();
 
-            app.UseCors("mine");
-
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                    name: "default",
+                    pattern: "{controller}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
@@ -91,8 +84,7 @@ namespace BudgetierWeb
 
                 if (env.IsDevelopment())
                 {
-                    // spa.UseAngularCliServer(npmScript: "start");
-                    spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
+                    spa.UseAngularCliServer(npmScript: "start");
                 }
             });
         }
