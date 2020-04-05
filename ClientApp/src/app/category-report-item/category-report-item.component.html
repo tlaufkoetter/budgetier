@@ -1,5 +1,5 @@
 <mat-card *ngIf="report" class="category-card">
-    <mat-card-title>{{report.category.name}}<span style="float:right">{{report.spent | currency : 'EUR'}}</span></mat-card-title>
+    <mat-card-title><span *ngIf="report.category">{{report.category.name}}</span><span style="float:right">{{report.spent | currency : 'EUR'}}</span></mat-card-title>
     <div *ngIf="report.category.budget > 0">
         <mat-card-subtitle>Budget: {{report.category.budget | currency : 'EUR'}} <span style="float:right">Übrig:
                 {{report.category.budget - report.spent | currency  : 'EUR'}}</span></mat-card-subtitle>

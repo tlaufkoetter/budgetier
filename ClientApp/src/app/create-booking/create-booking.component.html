@@ -12,15 +12,19 @@
         <mat-label>Titel</mat-label>
         <input matInput name="title" required minlength="4" ngModel type="text">
     </mat-form-field>
-    <br>
     <mat-form-field appearance="fill" class="full-width">
         <mat-label>Betrag</mat-label>
         <input matInput name="amount" required min="0.01" ngModel type="number">
     </mat-form-field>
-    <br>
     <mat-form-field appearance="fill" class="full-width">
         <mat-label>Datum</mat-label>
-        <input matInput name="timeStamp" required type="date" ngModel>
+        <input matInput name="timeStamp" required [matDatepicker]="picker" ngModel>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Kategorie</mat-label>
+        <input matInput name="subCategoryName" required type="text" ngModel>
     </mat-form-field>
     <div class="fab-container">
         <button mat-fab color="primary" [disabled]="f.invalid" type="submit">

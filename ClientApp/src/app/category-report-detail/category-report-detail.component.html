@@ -1,18 +1,20 @@
-<mat-toolbar color="primary">
-    <a mat-button [routerLink]="['/categories']">
-        <i class="material-icons">arrow_back</i>
-    </a>
-    <span class="fill-space"></span>
-    {{report.category.name}}
-    <span class="fill-space"></span>
-    <a mat-button disabled="true"></a>
-</mat-toolbar>
-<div *ngIf="report">
-    <app-category-report-item [report]="report" ></app-category-report-item>
-    <app-bookings [bookings]="report.bookings"></app-bookings>
-</div>
-<div class="fab-container">
-    <a mat-fab color="primary" [routerLink]="['/create-booking', report.category.id]">
-        <i class="material-icons">add</i>
-    </a>
+<div *ngIf="report$ | async as report">
+    <mat-toolbar color="primary">
+        <a mat-button [routerLink]="['/categories']">
+            <i class="material-icons">arrow_back</i>
+        </a>
+        <span class="fill-space"></span>
+        <span >{{report.category.name}}</span>
+        <span class="fill-space"></span>
+        <a mat-button disabled="true"></a>
+    </mat-toolbar>
+    <div>
+        <app-category-report-item [report]="report"></app-category-report-item>
+        <app-bookings [bookings]="report.bookings"></app-bookings>
+    </div>
+    <div class="fab-container">
+        <a mat-fab color="primary" [routerLink]="['/create-booking', report.category.id]">
+            <i class="material-icons">add</i>
+        </a>
+    </div>
 </div>

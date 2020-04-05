@@ -22,7 +22,8 @@ export class CreateBookingComponent implements OnInit {
       form.form.get("title").value,
       form.form.get("amount").value,
       form.form.get("timeStamp").value,
-      this.categoryId
+      this.categoryId,
+      form.form.get("subCategoryName").value
     ).subscribe(data => this.router.navigate(['/categories/' + this.categoryId]))
   }
 

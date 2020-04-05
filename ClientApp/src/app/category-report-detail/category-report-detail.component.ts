@@ -2,6 +2,7 @@ import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CategoryReport } from '../category-report';
 import { BudgetierApiService } from '../budgetier-api.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-category-report-detail',
@@ -9,14 +10,14 @@ import { BudgetierApiService } from '../budgetier-api.service';
   styleUrls: ['./category-report-detail.component.css']
 })
 export class CategoryReportDetailComponent implements OnInit {
-  report: CategoryReport
+  report$: Observable<CategoryReport>
 
   constructor(private route: ActivatedRoute, private budgetierApi: BudgetierApiService) {
   }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    this.budgetierApi.getCategoryReport(id).subscribe(data => this.report = data)
+    this.report$ = this.budgetierApi.getCategoryReport(id);
   }
 
 }

@@ -11,6 +11,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input'
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 import { CategoryReportsComponent } from './category-reports/category-reports.component';
 import { CategoryReportDetailComponent } from './category-report-detail/category-report-detail.component';
@@ -24,6 +25,7 @@ import { environment } from '../environments/environment';
 import { HttpClientModule } from '@angular/common/http';
 import { CreateCategoryComponent } from './create-category/create-category.component';
 import { CreateBookingComponent } from './create-booking/create-booking.component'
+import { MatNativeDateModule } from '@angular/material/core';
 
 registerLocaleData(localeDe, 'de-DE');
 
@@ -50,12 +52,14 @@ registerLocaleData(localeDe, 'de-DE');
     MatButtonModule,
     MatInputModule,
     MatMenuModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     HttpClientModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
   ],
   exports: [
   ],
-  providers: [{provide: LOCALE_ID, useValue: 'de-DE'}],
+  providers: [{provide: LOCALE_ID, useValue: 'de-DE'}, MatNativeDateModule],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
