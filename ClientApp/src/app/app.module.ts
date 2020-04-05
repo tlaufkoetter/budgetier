@@ -12,6 +12,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input'
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { ReactiveFormsModule} from '@angular/forms'
+
 
 import { CategoryReportsComponent } from './category-reports/category-reports.component';
 import { CategoryReportDetailComponent } from './category-report-detail/category-report-detail.component';
@@ -54,6 +57,8 @@ registerLocaleData(localeDe, 'de-DE');
     MatMenuModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatAutocompleteModule,
+    ReactiveFormsModule,
     HttpClientModule,
     ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production }),
   ],

@@ -1,8 +1,8 @@
 import { Category } from './category';
-import { Booking } from './booking';
+import { CategoryBooking } from './category-booking';
 
 export interface CategoryReport {
     category: Category
     spent: number
-    bookings: Booking[]
+    bookings: CategoryBooking[]
 }

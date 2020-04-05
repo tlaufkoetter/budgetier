@@ -28,9 +28,9 @@ namespace BudgetierApi.Controllers
 
         // GET api/category
         [HttpGet("")]
-        public ActionResult<IEnumerable<GetFullCategoryResponse>> GetCategories()
+        public ActionResult<IEnumerable<GetFullCategoryResponse>> GetCategories(Guid? parentId)
         {
-            var categoryEntities = context.Categories.Include(c => c.Children).Where(c => !c.ParentId.HasValue);
+            var categoryEntities = context.Categories.Include(c => c.Children).Where(c => c.ParentId == parentId);
 
             var categories = categoryEntities.Select(mapper.Map<GetFullCategoryResponse>);
             return Ok(mapper.Map<IEnumerable<GetFullCategoryResponse>>(categories));

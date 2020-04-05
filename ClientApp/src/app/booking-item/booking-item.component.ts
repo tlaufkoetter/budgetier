@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { Booking } from '../booking';
+import { CategoryBooking } from '../category-booking';
 
 @Component({
   selector: 'app-booking-item',
@@ -7,7 +8,7 @@ import { Booking } from '../booking';
   styleUrls: ['./booking-item.component.css']
 })
 export class BookingItemComponent implements OnInit {
-  @Input() booking: Booking
+  @Input() booking: CategoryBooking
   constructor() { }
 
   ngOnInit() {

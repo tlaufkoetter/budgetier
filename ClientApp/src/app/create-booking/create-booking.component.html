@@ -24,7 +24,18 @@
     </mat-form-field>
     <mat-form-field appearance="fill" class="full-width">
         <mat-label>Kategorie</mat-label>
-        <input matInput name="subCategoryName" required type="text" ngModel>
+        <input type="date"
+               placeholder="Pick one"
+               aria-label="Number"
+               matInput
+               name="subCategoryName"
+               [formControl]="myControl"
+               [matAutocomplete]="auto" required ngModel>
+        <mat-autocomplete #auto="matAutocomplete" >
+          <mat-option *ngFor="let option of categories$ | async" [value]="option">
+            {{option}}
+          </mat-option>
+        </mat-autocomplete>
     </mat-form-field>
     <div class="fab-container">
         <button mat-fab color="primary" [disabled]="f.invalid" type="submit">

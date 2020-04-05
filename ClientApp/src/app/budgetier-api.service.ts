@@ -51,4 +51,13 @@ export class BudgetierApiService {
     return this.http.post<CategoryBooking>(this.baseUrl + '/bookings', body)
   }
 
+  getCategories(parentId: string = null)
+  {
+    var params = "";
+    if (parentId)
+      params = "?parentId=" + parentId
+
+    return this.http.get<Category[]>(this.baseUrl + '/categories' + params)
+  }
+
 }
