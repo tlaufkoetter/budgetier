@@ -11,11 +11,15 @@ namespace BudgetierApi
     {
         public BudgetierProfile()
         {
-            CreateMap<CategoryEntity, GetCategoryBookingResponse.GetMinCategoryResponse>();
-            CreateMap<BookingEntity, GetCategoryBookingResponse>();
+            CreateMap<CategoryEntity, GetFullCategoryResponse>();
+            CreateMap<CategoryEntity, GetMinCategoryResponse>();
+            CreateMap<CategoryEntity, GetSubCategoryResponse>();
             CreateMap<CategoryEntity, GetCategoryResponse>();
-            CreateMap<CategoryReportEntity, GetCategoryReportsResponse.GetMinCategoryReportRepsponse>();
+
+            CreateMap<BookingEntity, GetCategoryBookingResponse>();
             CreateMap<BookingEntity, GetCategoryReportResponse.GetBookingResponse>();
+
+            CreateMap<CategoryReportEntity, GetCategoryReportsResponse.GetMinCategoryReportRepsponse>();
             CreateMap<CategoryReportEntity, GetCategoryReportResponse>();
 
             CreateMap<PutBookingRequest, BookingEntity>();

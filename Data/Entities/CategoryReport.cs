@@ -10,6 +10,5 @@ namespace BudgetierApi.Data.Entities
         public int Month { get; set; }
         public int Year { get; set; }
         public decimal Spent { get; set; }
-        public ICollection<BookingEntity> Bookings { get; set; } = new List<BookingEntity>();
     }
 }

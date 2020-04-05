@@ -17,12 +17,6 @@ namespace BudgetierApi.Controllers
     {
         private readonly BudgetierContext context;
         private readonly IMapper mapper;
-        private GetCategoryBookingResponse WithHref(GetCategoryBookingResponse booking)
-        {
-            booking.Href = Url.Action(nameof(GetBookingById), new { id = booking.Id });
-            booking.Category.Href = CategoriesController.GetHref(Url, booking.Category.Id);
-            return booking;
-        }
         public BookingsController(BudgetierContext context, IMapper mapper)
         {
             this.context = context;
@@ -39,9 +33,59 @@ namespace BudgetierApi.Controllers
                 return NotFound();
 
             GetCategoryBookingResponse response = mapper.Map<GetCategoryBookingResponse>(booking);
-            response.Category = mapper.Map<GetCategoryBookingResponse.GetMinCategoryResponse>(booking.Category);
+            response.Category = mapper.Map<GetMinCategoryResponse>(booking.Category);
 
-            return Ok(WithHref(response));
+            return Ok(response);
+        }
+
+        private BookingEntity UpdateReports(PutBookingRequest booking)
+        {
+            var year = booking.TimeStamp.Year;
+            var month = booking.TimeStamp.Month;
+
+            var subCategory = context.Categories.Where(c => c.Name.Equals(booking.SubCategoryName, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+            CategoryReportEntity subCategoryReport = null;
+            if (subCategory == null)
+            {
+                subCategory = new CategoryEntity() { Name = booking.SubCategoryName, ParentId = booking.CategoryId };
+                context.Categories.Add(subCategory);
+            }
+            else
+            {
+                subCategoryReport = context.CategoryReports.Find(subCategory.Id, year, month);
+            }
+
+            var categoryId = booking.CategoryId;
+            booking.CategoryId = subCategory.Id;
+
+            var createSubCategoryReport = subCategoryReport == null;
+            if (createSubCategoryReport)
+                subCategoryReport = new CategoryReportEntity { CategoryId = subCategory.Id, Year = year, Month = month};
+
+            subCategoryReport.Spent += (decimal)booking.Amount;
+
+            var bookingEntity = mapper.Map<BookingEntity>(booking);
+            context.Bookings.Add(bookingEntity);
+
+            if (createSubCategoryReport)
+                context.CategoryReports.Add(subCategoryReport);
+            else
+                context.Update(subCategoryReport);
+
+            var categoryReport = context.CategoryReports
+                .Find(categoryId, year, month);
+            var create = categoryReport == null;
+            if (create)
+            {
+                categoryReport = new CategoryReportEntity() { CategoryId = categoryId, Year = year, Month = month };
+            }
+            categoryReport.Spent += (decimal)booking.Amount;
+            if (create)
+                context.CategoryReports.Add(categoryReport);
+            else
+                context.Update(categoryReport);
+
+            return bookingEntity;
         }
 
         [HttpPost("")]
@@ -50,36 +94,19 @@ namespace BudgetierApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var bookingEntity = mapper.Map<BookingEntity>(booking);
-            context.Bookings.Add(bookingEntity);
-            var year = booking.TimeStamp.Year;
-            var month = booking.TimeStamp.Month;
+            if (context.Categories.Find(booking.CategoryId) == null)
+                return Conflict();
 
-            var categoryReport = context.CategoryReports
-                .Where(r => r.CategoryId == booking.CategoryId
-                    && r.Month == month
-                    && r.Year == year).FirstOrDefault();
-            var create = categoryReport == null;
-            if (create)
-            {
-                categoryReport = new CategoryReportEntity() { CategoryId = booking.CategoryId, Year = year, Month = month };
-            }
-            categoryReport.Spent += (decimal)booking.Amount;
-            categoryReport.Bookings.Add(bookingEntity);
-            if (create)
-                context.CategoryReports.Add(categoryReport);
-            else
-                context.Update(categoryReport);
-
+            var bookingEntity = UpdateReports(booking);
             context.SaveChanges();
 
             context.Entry(bookingEntity).Reference(b => b.Category).Load();
 
             var bookingResponse = mapper.Map<GetCategoryBookingResponse>(bookingEntity);
-            bookingResponse.Category = mapper.Map<GetCategoryBookingResponse.GetMinCategoryResponse>(bookingEntity.Category);
+            bookingResponse.Category = mapper.Map<GetMinCategoryResponse>(bookingEntity.Category);
 
 
-            return CreatedAtAction(nameof(GetBookingById), new {id = bookingEntity.Id}, WithHref(bookingResponse));
+            return CreatedAtAction(nameof(GetBookingById), new { id = bookingEntity.Id }, bookingResponse);
         }
     }
 }

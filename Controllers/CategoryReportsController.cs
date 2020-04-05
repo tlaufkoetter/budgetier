@@ -11,6 +11,7 @@ using BudgetierApi.Models;
 using BudgetierApi.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace BudgetierApi.Controllers
 {
@@ -27,74 +28,58 @@ namespace BudgetierApi.Controllers
             this.mapper = mapper;
         }
 
-        private GetCategoryReportsResponse.GetMinCategoryReportRepsponse WithRef(GetCategoryReportsResponse.GetMinCategoryReportRepsponse report, int year, int month)
-        {
-            report.Href = Url.Action(nameof(GetCategoryById), new { id = report.Category.Id, year = year, month = month });
-            return report;
-        }
-
-        private GetCategoryReportsResponse WithRef(GetCategoryReportsResponse report, int year, int month)
-        {
-            report.Href = Url.Action(nameof(GetCategoryReports), new { year = year, month = month });
-            report.Reports = report.Reports.Select(c => WithRef(c, year, month));
-            return report;
-        }
-
-        private GetCategoryReportResponse WithRef(GetCategoryReportResponse report, int year, int month)
-        {
-            report.Href = Url.Action(nameof(GetCategoryById), new { id = report.Category.Id, year = year, month = month });
-            report.Category.Href = CategoriesController.GetHref(Url, report.Category.Id);
-            return report;
-        }
-
         // GET api/categoryreports
         [HttpGet("")]
-        public ActionResult<GetCategoryReportsResponse> GetCategoryReports(int year = 0, [Range(1, 12)]int month = 0)
+        public ActionResult<GetCategoryReportsResponse> GetCategoryReports(int? year, [Range(1, 12)]int? month)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var categories = context.Categories;
+            var categories = context.Categories.Where(c => !c.ParentId.HasValue);
             var reportEntities = new List<CategoryReportEntity>();
             var now = DateTime.Now;
 
-            if (month < 1 || month > 12)
+            if (!month.HasValue)
                 month = now.Month;
 
-            if (year == 0)
+            if (!year.HasValue)
                 year = now.Year;
             foreach (var category in categories)
             {
-                var report = context.CategoryReports.Where(r => r.CategoryId == category.Id && r.Month == month && r.Year == year).FirstOrDefault();
+                var report = context.CategoryReports.Include(r => r.Category).FirstOrDefault(r => r.CategoryId == category.Id && r.Month == month.Value && r.Year == year.Value);
                 if (report == null)
                 {
-                    report = new CategoryReportEntity() { Category = category, CategoryId = category.Id, Month = month, Year = year, Spent = 0M };
+                    report = new CategoryReportEntity() { Category = category, CategoryId = category.Id, Month = month.Value, Year = year.Value, Spent = 0M };
                 }
                 reportEntities.Add(report);
             }
             var reports = reportEntities.Select(r => mapper.Map<GetCategoryReportsResponse.GetMinCategoryReportRepsponse>(r));
 
-            var response = new GetCategoryReportsResponse() { Month = month, Year = year, Reports = reports};
+            var response = new GetCategoryReportsResponse() { Month = month.Value, Year = year.Value, Reports = reports};
 
-            return Ok(WithRef(response, year, month));
+            return Ok(response);
         }
 
         // GET api/categoryreports/5
         [HttpGet("{id}")]
-        public ActionResult<GetCategoryReportResponse> GetCategoryById(Guid id, int year = 0, [Range(1,12)]int month = 0)
+        public ActionResult<GetCategoryReportResponse> GetCategoryById(Guid id, int? year, [Range(1,12)]int? month)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var now = DateTime.Now;
 
-            if (month < 1 || month > 12)
+            if (!month.HasValue)
                 month = now.Month;
 
-            if (year == 0)
+            if (!year.HasValue)
                 year = now.Year;
 
-            var report = context.CategoryReports.Where(r => r.CategoryId == id && r.Month == month && r.Year == year).FirstOrDefault();
+            IEnumerable<BookingEntity> bookings;
+            var report = context.CategoryReports.Include(r => r.Category)
+                .ThenInclude(c => c.Children).Include(r => r.Category)
+                .ThenInclude(c => c.Parent)
+                .FirstOrDefault(r => r.CategoryId == id && r.Month == month.Value && r.Year == year.Value);
             if (report == null)
             {
                 var category = context.Categories.Find(id);
@@ -103,20 +88,21 @@ namespace BudgetierApi.Controllers
 
                 report = new CategoryReportEntity()
                 {
-                    Month = month,
-                    Year = year,
+                    Month = month.Value,
+                    Year = year.Value,
                     Category = category
                 };
+                bookings = new List<BookingEntity>();
             }
             else
             {
-                context.Entry(report).Collection(r => r.Bookings).Load();
-                context.Entry(report).Reference(r => r.Category).Load();
+                bookings = context.Bookings.Include(b => b.Category).ThenInclude(c => c.Parent).Where(b => b.CategoryId == report.CategoryId || report.Category.Children.Select(c => c.Id).Any(c => c == b.CategoryId));
             }
 
             var reportResponse = mapper.Map<GetCategoryReportResponse>(report);
-            reportResponse.Bookings = report.Bookings.Select(mapper.Map<GetCategoryReportResponse.GetBookingResponse>);
-            return Ok(WithRef(reportResponse, year, month));
+            reportResponse.Bookings = bookings.Select(mapper.Map<GetCategoryReportResponse.GetBookingResponse>);
+            reportResponse.Category.Children = reportResponse.Category.Children.Select(mapper.Map<GetMinCategoryResponse>);
+            return Ok(reportResponse);
         }
     }
 }

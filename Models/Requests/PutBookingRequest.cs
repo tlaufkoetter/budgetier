@@ -12,6 +12,9 @@ namespace BudgetierApi.Models.Requests
         public Guid CategoryId { get; set; }
 
         [Required]
+        public string SubCategoryName { get; set; }
+
+        [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "The field \"amount\" must be greater than {1}")]
         public double Amount { get; set; }
 

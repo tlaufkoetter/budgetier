@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
 
 namespace BudgetierApi.Models.Responses
 {
-    public class GetCategoryResponse
+    public class GetSubCategoryResponse
     {
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public decimal? Budget { get; set; }
+        public GetMinCategoryResponse Parent {get;set;}
     }
 }
