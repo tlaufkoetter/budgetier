@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using BudgetierApi.Data;
 using Microsoft.OpenApi.Models;
 using System;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace BudgetierWeb
 {
@@ -37,6 +38,20 @@ namespace BudgetierWeb
             {
                 configuration.RootPath = "ClientApp/dist";
             });
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+        }
+
+        private void CorlsPolicy(CorsPolicyBuilder obj)
+        {
+            throw new NotImplementedException();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,6 +82,8 @@ namespace BudgetierWeb
             }
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseEndpoints(endpoints =>
             {
