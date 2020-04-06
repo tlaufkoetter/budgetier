@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,6 +9,7 @@ using BudgetierApi.Data;
 using Microsoft.OpenApi.Models;
 using System;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 
 namespace BudgetierWeb
 {
@@ -27,7 +27,7 @@ namespace BudgetierWeb
         {
             services.AddControllersWithViews();
             services.AddAutoMapper(typeof(Startup));
-            services.AddDbContext<BudgetierContext>(opt => opt.UseInMemoryDatabase("Budgetier.db"));
+            services.AddDbContext<BudgetierContext>(opt => opt.UseSqlite("Data Source=Budgetier.db"));
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Budgetier Api", Version = "v1" });

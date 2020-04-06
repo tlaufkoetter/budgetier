@@ -40,7 +40,7 @@ namespace BudgetierApi.Controllers
         [HttpGet("{id}")]
         public ActionResult<GetFullCategoryResponse> GetCategoryById(Guid id)
         {
-            var category = context.Categories.Include(c => c.Children).Include(c => c.Parent).FirstOrDefault(c => c.Id == id);
+            var category = context.Categories.Include(c => c.Children).Include(c => c.Parent).SingleOrDefault(c => c.Id == id);
             if (category == null)
                 return NotFound();
 

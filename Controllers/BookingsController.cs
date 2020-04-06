@@ -8,6 +8,7 @@ using BudgetierApi.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using BudgetierApi.Models.Responses;
 using BudgetierApi.Models.Requests;
+using Microsoft.EntityFrameworkCore;
 
 namespace BudgetierApi.Controllers
 {
@@ -43,29 +44,25 @@ namespace BudgetierApi.Controllers
             var year = booking.TimeStamp.Year;
             var month = booking.TimeStamp.Month;
 
-            var subCategory = context.Categories.Where(c => c.Name.Equals(booking.SubCategoryName, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+            var categoryId = booking.CategoryId;
+            var subCategory = context.Categories.SingleOrDefault(c => c.ParentId == categoryId &&  EF.Functions.Like(c.Name, $"%{booking.SubCategoryName}%"));
             CategoryReportEntity subCategoryReport = null;
             if (subCategory == null)
             {
                 subCategory = new CategoryEntity() { Name = booking.SubCategoryName, ParentId = booking.CategoryId };
-                context.Categories.Add(subCategory);
             }
             else
             {
                 subCategoryReport = context.CategoryReports.Find(subCategory.Id, year, month);
             }
 
-            var categoryId = booking.CategoryId;
-            booking.CategoryId = subCategory.Id;
 
             var createSubCategoryReport = subCategoryReport == null;
             if (createSubCategoryReport)
-                subCategoryReport = new CategoryReportEntity { CategoryId = subCategory.Id, Year = year, Month = month};
+                subCategoryReport = new CategoryReportEntity { Category = subCategory, Year = year, Month = month};
 
             subCategoryReport.Spent += (decimal)booking.Amount;
 
-            var bookingEntity = mapper.Map<BookingEntity>(booking);
-            context.Bookings.Add(bookingEntity);
 
             if (createSubCategoryReport)
                 context.CategoryReports.Add(subCategoryReport);
@@ -85,6 +82,12 @@ namespace BudgetierApi.Controllers
             else
                 context.Update(categoryReport);
 
+            var bookingEntity = mapper.Map<BookingEntity>(booking);
+            bookingEntity.CategoryId = subCategory.Id;
+            context.Bookings.Add(bookingEntity);
+
+            context.SaveChanges();
+
             return bookingEntity;
         }
 
@@ -98,7 +101,6 @@ namespace BudgetierApi.Controllers
                 return Conflict();
 
             var bookingEntity = UpdateReports(booking);
-            context.SaveChanges();
 
             context.Entry(bookingEntity).Reference(b => b.Category).Load();
 

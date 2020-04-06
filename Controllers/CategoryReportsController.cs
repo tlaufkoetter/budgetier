@@ -46,7 +46,7 @@ namespace BudgetierApi.Controllers
                 year = now.Year;
             foreach (var category in categories)
             {
-                var report = context.CategoryReports.Include(r => r.Category).FirstOrDefault(r => r.CategoryId == category.Id && r.Month == month.Value && r.Year == year.Value);
+                var report = context.CategoryReports.Include(r => r.Category).SingleOrDefault(r => r.CategoryId == category.Id && r.Month == month.Value && r.Year == year.Value);
                 if (report == null)
                 {
                     report = new CategoryReportEntity() { Category = category, CategoryId = category.Id, Month = month.Value, Year = year.Value, Spent = 0M };
@@ -79,7 +79,7 @@ namespace BudgetierApi.Controllers
             var report = context.CategoryReports.Include(r => r.Category)
                 .ThenInclude(c => c.Children).Include(r => r.Category)
                 .ThenInclude(c => c.Parent)
-                .FirstOrDefault(r => r.CategoryId == id && r.Month == month.Value && r.Year == year.Value);
+                .SingleOrDefault(r => r.CategoryId == id && r.Month == month.Value && r.Year == year.Value);
             if (report == null)
             {
                 var category = context.Categories.Find(id);
