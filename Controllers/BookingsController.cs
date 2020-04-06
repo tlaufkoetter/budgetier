@@ -26,10 +26,10 @@ namespace BudgetierApi.Controllers
 
         // GET api/bookings/5
         [HttpGet("{id}")]
-        public ActionResult<GetCategoryBookingResponse> GetBookingById(Guid id)
+        public async Task<ActionResult<GetCategoryBookingResponse>> GetBookingById(Guid id)
         {
-            var booking = context.Bookings.Find(id);
-            context.Entry(booking).Reference(b => b.Category).Load();
+            var booking = await context.Bookings.FindAsync(id);
+            await context.Entry(booking).Reference(b => b.Category).LoadAsync();
             if (booking == null)
                 return NotFound();
 
@@ -39,13 +39,13 @@ namespace BudgetierApi.Controllers
             return Ok(response);
         }
 
-        private BookingEntity UpdateReports(PutBookingRequest booking)
+        private async Task<BookingEntity> UpdateReports(PutBookingRequest booking)
         {
             var year = booking.TimeStamp.Year;
             var month = booking.TimeStamp.Month;
 
             var categoryId = booking.CategoryId;
-            var subCategory = context.Categories.SingleOrDefault(c => c.ParentId == categoryId &&  EF.Functions.Like(c.Name, $"%{booking.SubCategoryName}%"));
+            var subCategory = await context.Categories.SingleOrDefaultAsync(c => c.ParentId == categoryId &&  EF.Functions.Like(c.Name, $"%{booking.SubCategoryName}%"));
             CategoryReportEntity subCategoryReport = null;
             if (subCategory == null)
             {
@@ -53,7 +53,7 @@ namespace BudgetierApi.Controllers
             }
             else
             {
-                subCategoryReport = context.CategoryReports.Find(subCategory.Id, year, month);
+                subCategoryReport = await context.CategoryReports.FindAsync(subCategory.Id, year, month);
             }
 
 
@@ -65,12 +65,12 @@ namespace BudgetierApi.Controllers
 
 
             if (createSubCategoryReport)
-                context.CategoryReports.Add(subCategoryReport);
+                await context.CategoryReports.AddAsync(subCategoryReport);
             else
                 context.Update(subCategoryReport);
 
-            var categoryReport = context.CategoryReports
-                .Find(categoryId, year, month);
+            var categoryReport = await context.CategoryReports
+                .FindAsync(categoryId, year, month);
             var create = categoryReport == null;
             if (create)
             {
@@ -78,21 +78,21 @@ namespace BudgetierApi.Controllers
             }
             categoryReport.Spent += (decimal)booking.Amount;
             if (create)
-                context.CategoryReports.Add(categoryReport);
+                await context.CategoryReports.AddAsync(categoryReport);
             else
                 context.Update(categoryReport);
 
             var bookingEntity = mapper.Map<BookingEntity>(booking);
             bookingEntity.CategoryId = subCategory.Id;
-            context.Bookings.Add(bookingEntity);
+            await context.Bookings.AddAsync(bookingEntity);
 
-            context.SaveChanges();
+            await context.SaveChangesAsync();
 
             return bookingEntity;
         }
 
         [HttpPost("")]
-        public ActionResult<GetCategoryBookingResponse> PostBooking(PutBookingRequest booking)
+        public async Task<ActionResult<GetCategoryBookingResponse>> PostBooking(PutBookingRequest booking)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -100,9 +100,9 @@ namespace BudgetierApi.Controllers
             if (context.Categories.Find(booking.CategoryId) == null)
                 return Conflict();
 
-            var bookingEntity = UpdateReports(booking);
+            var bookingEntity = await UpdateReports(booking);
 
-            context.Entry(bookingEntity).Reference(b => b.Category).Load();
+            await context.Entry(bookingEntity).Reference(b => b.Category).LoadAsync();
 
             var bookingResponse = mapper.Map<GetCategoryBookingResponse>(bookingEntity);
             bookingResponse.Category = mapper.Map<GetMinCategoryResponse>(bookingEntity.Category);

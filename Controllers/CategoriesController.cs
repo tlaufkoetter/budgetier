@@ -28,9 +28,9 @@ namespace BudgetierApi.Controllers
 
         // GET api/category
         [HttpGet("")]
-        public ActionResult<IEnumerable<GetFullCategoryResponse>> GetCategories(Guid? parentId)
+        public async Task<ActionResult<IEnumerable<GetFullCategoryResponse>>> GetCategories(Guid? parentId)
         {
-            var categoryEntities = context.Categories.Include(c => c.Children).Where(c => c.ParentId == parentId);
+            var categoryEntities = await context.Categories.Include(c => c.Children).Where(c => c.ParentId == parentId).ToListAsync();
 
             var categories = categoryEntities.Select(mapper.Map<GetFullCategoryResponse>);
             return Ok(mapper.Map<IEnumerable<GetFullCategoryResponse>>(categories));
@@ -38,9 +38,9 @@ namespace BudgetierApi.Controllers
 
         // GET api/category/5
         [HttpGet("{id}")]
-        public ActionResult<GetFullCategoryResponse> GetCategoryById(Guid id)
+        public async Task<ActionResult<GetFullCategoryResponse>> GetCategoryById(Guid id)
         {
-            var category = context.Categories.Include(c => c.Children).Include(c => c.Parent).SingleOrDefault(c => c.Id == id);
+            var category = await context.Categories.Include(c => c.Children).Include(c => c.Parent).SingleOrDefaultAsync(c => c.Id == id);
             if (category == null)
                 return NotFound();
 
@@ -49,11 +49,11 @@ namespace BudgetierApi.Controllers
 
         // POST api/category
         [HttpPost("")]
-        public ActionResult<GetFullCategoryResponse> Poststring(PutCategoryRequest categoryRequest)
+        public async Task<ActionResult<GetFullCategoryResponse>> Poststring(PutCategoryRequest categoryRequest)
         {
             var entity = mapper.Map<CategoryEntity>(categoryRequest);
-            context.Categories.Add(entity);
-            context.SaveChanges();
+            await context.Categories.AddAsync(entity);
+            await context.SaveChangesAsync();
             var category = mapper.Map<GetFullCategoryResponse>(entity);
             return CreatedAtAction(nameof(GetCategoryById), new { id = entity.Id }, category);
         }

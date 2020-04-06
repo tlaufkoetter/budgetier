@@ -1,5 +1,3 @@
-using Microsoft.CSharp.RuntimeBinder;
-using System.Collections;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +5,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using BudgetierApi.Data;
 using BudgetierApi.Data.Entities;
-using BudgetierApi.Models;
 using BudgetierApi.Models.Responses;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
@@ -30,12 +27,11 @@ namespace BudgetierApi.Controllers
 
         // GET api/categoryreports
         [HttpGet("")]
-        public ActionResult<GetCategoryReportsResponse> GetCategoryReports(int? year, [Range(1, 12)]int? month)
+        public async Task<ActionResult<GetCategoryReportsResponse>> GetCategoryReports(int? year, [Range(1, 12)]int? month)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var categories = context.Categories.Where(c => !c.ParentId.HasValue);
             var reportEntities = new List<CategoryReportEntity>();
             var now = DateTime.Now;
 
@@ -44,16 +40,18 @@ namespace BudgetierApi.Controllers
 
             if (!year.HasValue)
                 year = now.Year;
+
+            var categories = context.Categories.Where(c => !c.ParentId.HasValue);
             foreach (var category in categories)
             {
-                var report = context.CategoryReports.Include(r => r.Category).SingleOrDefault(r => r.CategoryId == category.Id && r.Month == month.Value && r.Year == year.Value);
+                var report = await context.CategoryReports.Include(r => r.Category).SingleOrDefaultAsync(r => r.CategoryId == category.Id && r.Month == month.Value && r.Year == year.Value);
                 if (report == null)
                 {
                     report = new CategoryReportEntity() { Category = category, CategoryId = category.Id, Month = month.Value, Year = year.Value, Spent = 0M };
                 }
                 reportEntities.Add(report);
             }
-            var reports = reportEntities.Select(r => mapper.Map<GetCategoryReportsResponse.GetMinCategoryReportRepsponse>(r));
+            var reports = reportEntities.Select(mapper.Map<GetCategoryReportsResponse.GetMinCategoryReportRepsponse>);
 
             var response = new GetCategoryReportsResponse() { Month = month.Value, Year = year.Value, Reports = reports};
 
@@ -62,7 +60,7 @@ namespace BudgetierApi.Controllers
 
         // GET api/categoryreports/5
         [HttpGet("{id}")]
-        public ActionResult<GetCategoryReportResponse> GetCategoryById(Guid id, int? year, [Range(1,12)]int? month)
+        public async Task<ActionResult<GetCategoryReportResponse>> GetCategoryById(Guid id, int? year, [Range(1,12)]int? month)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -76,13 +74,13 @@ namespace BudgetierApi.Controllers
                 year = now.Year;
 
             IEnumerable<BookingEntity> bookings;
-            var report = context.CategoryReports.Include(r => r.Category)
+            var report = await context.CategoryReports.Include(r => r.Category)
                 .ThenInclude(c => c.Children).Include(r => r.Category)
                 .ThenInclude(c => c.Parent)
-                .SingleOrDefault(r => r.CategoryId == id && r.Month == month.Value && r.Year == year.Value);
+                .SingleOrDefaultAsync(r => r.CategoryId == id && r.Month == month.Value && r.Year == year.Value);
             if (report == null)
             {
-                var category = context.Categories.Find(id);
+                var category = await context.Categories.FindAsync(id);
                 if (category == null)
                     return NotFound();
 
@@ -96,7 +94,7 @@ namespace BudgetierApi.Controllers
             }
             else
             {
-                bookings = context.Bookings.Include(b => b.Category).ThenInclude(c => c.Parent).Where(b => b.CategoryId == report.CategoryId || report.Category.Children.Select(c => c.Id).Any(c => c == b.CategoryId));
+                bookings = await context.Bookings.Include(b => b.Category).ThenInclude(c => c.Parent).Where(b => b.CategoryId == report.CategoryId || report.Category.Children.Select(c => c.Id).Any(c => c == b.CategoryId)).ToListAsync();
             }
 
             var reportResponse = mapper.Map<GetCategoryReportResponse>(report);
