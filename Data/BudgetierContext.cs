@@ -7,7 +7,9 @@ namespace BudgetierApi.Data
     {
         public BudgetierContext(DbContextOptions<BudgetierContext> options)
         : base(options)
-        { }
+        { 
+            this.Database.Migrate();
+        }
 
         public DbSet<BookingEntity> Bookings { get; set; }
         public DbSet<CategoryEntity> Categories { get; set; }
